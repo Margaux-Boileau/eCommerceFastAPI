@@ -1,3 +1,6 @@
-from api.routers.router_products import hello
+from fastapi import FastAPI
+from api.routers.product import router_products
 
-hello()
+app = FastAPI()
+
+app.include_router(router_products)
