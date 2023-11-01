@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Response, status, File, UploadFile
+from fastapi.responses import FileResponse
 from config.database import products_collection
 from api.schemas.schemas import productEntity, productsEntity
 from api.models.product import Product
@@ -30,13 +31,39 @@ async def find_by_name(name: str):
 async def get_product_by_id(id: str):
     return productEntity(products_collection.find_one({"_id": ObjectId(id)}))
 
+# Get the image of a product by it's filename
+@router_products.get("/products/images/{filename}", tags=["Products"])
+async def get_product_image(filename: str):
+    return FileResponse(f"api/uploads/images/{filename}")
 
 # POST
 # Insert a product in the Products collection
 @router_products.post("/products", response_model=Product, tags=["Products"])
-async def insert_product(product: Product) -> dict:
+async def insert_product(product: Product, file: UploadFile = File(...)) -> dict:
     new_product = products_collection.insert_one(dict(product))
     return productEntity(new_product)
+
+# Upload an image to the uploads/images folder
+@router_products.post("/products/images", status_code=status.HTTP_200_OK, tags=["Products"])
+async def upload_product_image(file: UploadFile = File(...)):
+    
+    # Specify the path where the image will be saved
+    FILEPATH = "api/uploads/images/"
+    filename = file.filename
+    
+    # Check if the file is an image
+    extension = filename.split(".")[-1]
+    
+    if extension not in ("jpg", "jpeg", "png"):
+        return {"error": "File format not allowed"}
+    
+    # Save the image
+    file_content = await file.read()
+    
+    with open(FILEPATH + filename, "wb") as f:
+        f.write(file_content)
+        
+    return {"success": True, "filename": file.filename, "message": "File uploaded succesfully"}
 
 # PUT
 # Update a product in the Products collection
