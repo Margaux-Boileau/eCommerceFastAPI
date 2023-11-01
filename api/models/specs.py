@@ -10,7 +10,7 @@ class Specs(BaseModel):
     class Config:
         orm_mode = True
         schema_extra = {
-            "example": {
+            "specs": {
                 "cpu": "Intel Core i9-9900K",
                 "ram": "64GB DDR4",
                 "storage": "2TB NVMe SSD",

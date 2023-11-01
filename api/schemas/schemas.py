@@ -1,8 +1,8 @@
 import bson
 
-def product_entity(product) -> dict:
+def productEntity(product) -> dict:
     return { 
-            "_id" : str(product["_id"]),
+            "id" : str(product["_id"]),
             "name": product["name"],
             "image": product["image"],
             "category": product["category"],
@@ -15,5 +15,13 @@ def product_entity(product) -> dict:
   
 # A las entities se les puede llamar serials o serializers  
 
-def products_entity(products) -> list:
-    return [product_entity(product) for product in products]
+def productsEntity(products) -> list:
+    return [productEntity(product) for product in products]
+
+def specsEntity(specs) -> dict:
+    return { 
+            "cpu" :specs["cpu"],
+            "ram": specs["cpu"],
+            "storage": specs["storage"],
+            "ddos_protect": specs["ddos_protect"]
+        }
