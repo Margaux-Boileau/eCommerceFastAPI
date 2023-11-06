@@ -1,4 +1,3 @@
-import bson
 
 def productEntity(product) -> dict:
     return { 

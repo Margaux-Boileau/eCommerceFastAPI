@@ -2,14 +2,14 @@ from pydantic import BaseModel
 from typing import Optional
 
 class Specs(BaseModel):
-    cpu: Optional[str] = "Not specified"
-    ram: Optional[str] = "Not specified"
-    storage: Optional[str] = "Not specified"
-    ddos_protect: Optional[bool] = False
+    cpu: Optional[str] = None
+    ram: Optional[str] = None
+    storage: Optional[str] = None
+    ddos_protect: Optional[bool] = None
     
     class Config:
-        orm_mode = True
-        schema_extra = {
+        from_attributes = True
+        json_schema_extra = {
             "specs": {
                 "cpu": "Intel Core i9-9900K",
                 "ram": "64GB DDR4",

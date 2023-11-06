@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Response, status, File, UploadFile
+from fastapi import APIRouter, Response, status, File, UploadFile, Body
 from fastapi.responses import FileResponse
 from config.database import products_collection
 from api.schemas.schemas import productEntity, productsEntity
 from api.models.product import Product
 from bson import ObjectId
 from starlette import status
-
 
 router_products = APIRouter()
 
@@ -39,8 +38,11 @@ async def get_product_image(filename: str):
 # POST
 # Insert a product in the Products collection
 @router_products.post("/products", response_model=Product, tags=["Products"])
-async def insert_product(product: Product, file: UploadFile = File(...)) -> dict:
-    new_product = products_collection.insert_one(dict(product))
+async def insert_product(product: Product ) -> dict:
+    # Insert the product in the Products collection
+    insert = products_collection.insert_one(Product.model_dump(product))
+    # Get the new product inserted by it's generated id
+    new_product = products_collection.find_one({"_id": insert.inserted_id})
     return productEntity(new_product)
 
 # Upload an image to the uploads/images folder
@@ -70,7 +72,7 @@ async def upload_product_image(file: UploadFile = File(...)):
 @router_products.put("/products/{id}", response_model=Product, tags=["Products"])
 async def update_product(id: str, product: Product) -> dict:
     # Update the product that matches the id
-     products_collection.find_one_and_update({"_id": ObjectId(id)}, {"$set": dict(product)})
+     products_collection.find_one_and_update({"_id": ObjectId(id)}, {"$set": Product.model_dump(product)})
      # Return the updated product
      return productEntity(products_collection.find_one({"_id": ObjectId(id)}))
 
