@@ -3,7 +3,7 @@ from typing import Optional
 from api.models.specs import Specs
 
 class Product(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     name: str
     image: str
     category: str
@@ -17,7 +17,6 @@ class Product(BaseModel):
         from_attributes = True
         json_schema_extra = {
             "example": {
-                "id" : "",
                 "name" : "Minecraft Server",
                 "image": "minecraft.jpg",
                 "category": "Game",
@@ -33,4 +32,3 @@ class Product(BaseModel):
                 "times_bought": 1
             }
         }
-    
