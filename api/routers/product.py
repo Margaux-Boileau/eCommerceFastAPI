@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Response, status, File, UploadFile, Body
+from fastapi import APIRouter, Response, status, File, UploadFile, Query
 from fastapi.responses import FileResponse
 from config.database import products_collection
 from api.schemas.schemas import productEntity, productsEntity
 from api.models.product import Product
 from bson import ObjectId
 from starlette import status
+from typing import List
 
 router_products = APIRouter()
 
@@ -29,6 +30,18 @@ async def find_by_name(name: str):
 @router_products.get("/products/{id}", response_model=Product, tags=["Products"])
 async def get_product_by_id(id: str):
     return productEntity(products_collection.find_one({"_id": ObjectId(id)}))
+
+# Finds all the products that match the id's in the list of id's
+@router_products.get("/products/cart/", response_model=list[Product], tags=["Products"])
+async def get_products_from_cart(idList: list[str] = Query(...)):
+    productList = []
+    for id in idList:
+        # Checks if the ID is a valid ObjectId
+        if ObjectId.is_valid(id):
+            product = products_collection.find_one({"_id": ObjectId(id)})
+            if product:
+                productList.append(product)
+    return productsEntity(productList)
 
 # Get the image of a product by it's filename
 @router_products.get("/products/images/{filename}", tags=["Products"])
