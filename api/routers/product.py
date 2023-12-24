@@ -5,7 +5,6 @@ from api.schemas.schemas import productEntity, productsEntity
 from api.models.product import Product
 from bson import ObjectId
 from starlette import status
-from typing import List
 
 router_products = APIRouter()
 
@@ -88,6 +87,36 @@ async def update_product(id: str, product: Product) -> dict:
      products_collection.find_one_and_update({"_id": ObjectId(id)}, {"$set": Product.model_dump(product)})
      # Return the updated product
      return productEntity(products_collection.find_one({"_id": ObjectId(id)}))
+
+
+# Finds all the products that match the id's in the list of id's
+@router_products.get("/products/cart/", response_model=list[Product], tags=["Products"])
+async def get_products_from_cart(idList: list[str] = Query(...)):
+    productList = []
+    for id in idList:
+        # Checks if the ID is a valid ObjectId
+        if ObjectId.is_valid(id):
+            product = products_collection.find_one({"_id": ObjectId(id)})
+            if product:
+                productList.append(product)
+    return productsEntity(productList)
+
+# PATCH
+# Update the times a product have been bought in the Products collection
+@router_products.patch("/products/updatecounter/", response_model=list[Product], tags=["Products"])
+async def update_product_times_bought(idList: list[str] = Query(...)) -> dict:
+    # Update the product that matches the id
+    productList = []
+    for id in idList:
+        # Checks if the ID is a valid ObjectId
+        if ObjectId.is_valid(id):
+            product = products_collection.find_one({"_id": ObjectId(id)})
+            if product:
+                products_collection.update_one({"_id": ObjectId(id)}, {"$set": {"times_bought": product.get("times_bought") + 1}})
+                productList.append(products_collection.find_one({"_id": ObjectId(id)}))
+     # Return the updated product list
+    return productsEntity(productList)
+
 
 # DELETE
 
